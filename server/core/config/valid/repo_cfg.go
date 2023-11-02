@@ -19,6 +19,7 @@ type RepoCfg struct {
 	Workflows                  map[string]Workflow
 	PolicySets                 PolicySets
 	Automerge                  *bool
+	AutoDiscover               *AutoDiscover
 	ParallelApply              *bool
 	ParallelPlan               *bool
 	ParallelPolicyCheck        *bool
@@ -89,6 +90,20 @@ func isRegexAllowed(name string, allowedRegexpPrefixes []string) bool {
 		}
 	}
 	return false
+}
+
+func (r RepoCfg) AutoDiscoverEnabled(defaultAutoDiscoverMode AutoDiscoverMode) bool {
+	autoDiscoverMode := defaultAutoDiscoverMode
+	if r.AutoDiscover != nil {
+		autoDiscoverMode = r.AutoDiscover.Mode
+	}
+
+	if autoDiscoverMode == AutoDiscoverAutoMode {
+		// Autodiscover is enabled by default when no projects are defined
+		return len(r.Projects) == 0
+	}
+
+	return autoDiscoverMode == AutoDiscoverEnabledMode
 }
 
 // validateWorkspaceAllowed returns an error if repoCfg defines projects in
